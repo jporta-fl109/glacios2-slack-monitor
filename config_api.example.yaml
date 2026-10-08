@@ -1,0 +1,82 @@
+# Glacios 2 -> Slack monitor (TEM Scripting API version) configuration
+#
+# This polls live instrument status via pytemscript-server, instead of
+# tailing a log file. See README.md "API version" for setup steps,
+# including running pytemscript-server on the instrument control PC.
+#
+# Copy this file to config_api.yaml and edit it.
+
+# --- Connection to pytemscript-server -----------------------------------
+# Host/port where pytemscript-server is running. If this monitor script
+# runs on the SAME machine as pytemscript-server (e.g. both on the
+# instrument PC), use "localhost". If it runs elsewhere on your network,
+# use that PC's hostname/IP -- and make sure the firewall only allows
+# this inside your internal network (pytemscript-server has no built-in
+# authentication).
+# Env var overrides: TEM_API_HOST, TEM_API_PORT
+host: "localhost"
+port: 39000
+
+# How often to poll, in seconds. Live status doesn't need to be checked
+# as often as a log file -- every 30-60s is usually plenty for vacuum/
+# LN2 monitoring.
+poll_interval_seconds: 30
+
+# --- State ---------------------------------------------------------------
+state_file: "./state/tem_api_monitor_state.json"
+
+# --- Slack ---------------------------------------------------------------
+# Same two options as the log-based monitor.
+# Env var overrides: SLACK_WEBHOOK_URL, or SLACK_BOT_TOKEN + SLACK_CHANNEL
+slack_webhook_url: ""
+slack_bot_token: ""
+slack_channel: ""
+
+# If true, alerts are logged instead of posted to Slack -- use this
+# while you verify the checks below actually work against your real
+# instrument, before a Slack channel exists.
+dry_run: true
+
+# --- Checks --------------------------------------------------------------
+# Each check polls one live value and decides whether to alert.
+# IMPORTANT: the attribute/method names used internally (mic.vacuum.status,
+# mic.temperature.dewar_level(), etc.) are best-guesses from pytemscript's
+# public docs, NOT yet verified against a real Glacios 2. See README.md
+# "Verifying the API checks" before relying on this -- the first time you
+# run this against your real instrument, watch the logs for warnings
+# about check functions raising errors, which usually means an attribute
+# name needs adjusting in tem_api_monitor.py for your pytemscript version.
+checks:
+  - name: vacuum_status
+    function: vacuum_status
+    severity: critical
+    cooldown_minutes: 15
+
+  - name: vacuum_gauge_pressure
+    function: vacuum_gauges
+    severity: critical
+    cooldown_minutes: 15
+    max_pressure_pa: 1.0e-4   # tune to your normal operating pressure
+
+  - name: autoloader_unavailable
+    function: autoloader_available
+    severity: warning
+    cooldown_minutes: 30
+
+  - name: ln2_dewar_low
+    function: dewar_level
+    severity: warning
+    cooldown_minutes: 30
+    min_percent: 20
+
+  - name: ln2_dewar_filling_stuck
+    function: dewar_filling_stuck
+    severity: critical
+    cooldown_minutes: 30
+    max_fill_minutes: 20
+
+  - name: ln2_refill_due_soon
+    function: dewar_time_to_refill
+    severity: info
+    cooldown_minutes: 60
+    warn_minutes: 60

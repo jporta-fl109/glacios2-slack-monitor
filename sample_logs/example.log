@@ -1,0 +1,18 @@
+2026-09-30 08:00:01 INFO  System startup complete. Instrument ready.
+2026-09-30 08:02:15 INFO  Vacuum system nominal. Column pressure 2.1e-7 Pa.
+2026-09-30 08:05:40 INFO  Autoloader cassette 3 inserted.
+2026-09-30 08:06:02 INFO  LN2 autofill cycle started for autoloader dewar.
+2026-09-30 08:11:22 INFO  LN2 autofill cycle completed successfully. Dewar level 94%.
+2026-09-30 09:14:10 WARNING Turbo pump 2 running above normal speed variance.
+2026-09-30 09:14:55 INFO  Turbo pump 2 speed normalized.
+2026-09-30 10:02:00 ERROR Vacuum interlock tripped on column valve V3. Gun vacuum out of range.
+2026-09-30 10:02:01 ERROR Vacuum fault detected: column pressure exceeded threshold (5.4e-4 Pa).
+2026-09-30 10:05:33 INFO  Vacuum system recovering. Column pressure 8.2e-6 Pa.
+2026-09-30 10:06:01 INFO  Vacuum system nominal. Column pressure 2.0e-7 Pa.
+2026-09-30 11:30:44 WARNING LN2 dewar level low (18%). Refill recommended.
+2026-09-30 11:45:02 ERROR LN2 autofill cycle failed: timeout waiting for fill sensor.
+2026-09-30 11:45:10 ERROR LN2 autofill cycle failed: timeout waiting for fill sensor.
+2026-09-30 11:50:00 ERROR LN2 autofill cycle failed: timeout waiting for fill sensor.
+2026-09-30 12:00:00 INFO  Manual LN2 fill completed. Dewar level 91%.
+2026-09-30 13:20:00 WARNING Beam current drifting outside calibration window.
+2026-09-30 14:00:00 INFO  Nightly self-test passed.

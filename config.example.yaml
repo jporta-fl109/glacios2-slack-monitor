@@ -1,0 +1,101 @@
+# Glacios 2 -> Slack monitor configuration
+#
+# Copy this file to config.yaml and edit the values for your site.
+# Everything here can also be overridden with environment variables
+# (see the comments next to each key) so you don't have to put a
+# Slack secret in a file that might get checked into version control.
+
+# --- Log source -------------------------------------------------------
+# Path to the TEM interface log file to tail. This can be a local path
+# on the instrument PC, or a path to a mounted network share.
+# Supports Windows paths (e.g. "D:\\TemLogs\\TemServer.log") and Linux/
+# network-share paths (e.g. "/mnt/instrument-logs/glacios2/current.log").
+#
+# If the software rotates logs (renames the current file and starts a
+# new one, e.g. TemServer.log -> TemServer.log.1), the monitor detects
+# the rotation automatically (by inode/size) and re-opens the new file
+# on Linux. On Windows, rotation detection uses file size shrinking +
+# re-open; see README.md "Log rotation on Windows" if your software
+# rotates differently.
+log_path: "/path/to/tem_interface.log"
+
+# How often to check the log file for new lines, in seconds.
+poll_interval_seconds: 5
+
+# --- State -------------------------------------------------------------
+# Where the monitor remembers its last-read position and recent alerts,
+# so it doesn't replay the whole log or spam Slack after a restart.
+state_file: "./state/tem_monitor_state.json"
+
+# --- Slack ---------------------------------------------------------------
+# Option A (simplest): an Incoming Webhook URL for a specific channel.
+# Create one at https://api.slack.com/apps -> your app -> Incoming Webhooks.
+# Env var override: SLACK_WEBHOOK_URL
+slack_webhook_url: ""
+
+# Option B: a Slack bot token + channel, used with chat.postMessage.
+# Useful once you've created a dedicated channel (e.g. #glacios2-alerts)
+# and want the bot to also react to messages, thread replies, etc.
+# Env var overrides: SLACK_BOT_TOKEN, SLACK_CHANNEL
+slack_bot_token: ""
+slack_channel: ""   # e.g. "#glacios2-alerts" or a channel ID like "C0123456789"
+
+# If true, alerts are logged to stdout instead of posted to Slack.
+# Useful for initial footwork / testing rules against real logs before
+# a Slack channel exists.
+dry_run: true
+
+# --- Alert rules -----------------------------------------------------
+# Each rule is a regex tested against each new log line (case-insensitive
+# by default). The FIRST matching rule wins for a given line.
+#
+# severity: critical | warning | info  -- controls emoji/formatting in Slack
+# cooldown_minutes: suppress repeat alerts for the SAME rule within this
+#   window, so a flapping condition doesn't flood the channel. The
+#   suppressed count is included in the next alert that does go through.
+#
+# These defaults are a reasonable starting point based on common Thermo
+# Fisher TEM interface terminology (vacuum system, autoloader / cold
+# trap / dewar fills). You WILL need to tune these against real log
+# samples from your Glacios 2 -- log wording varies by software version.
+# See README.md "Tuning rules against real logs".
+rules:
+  - name: vacuum_fault
+    pattern: '(vacuum).*(fault|fail|error|interlock|trip|out of range|too high|too low)'
+    severity: critical
+    cooldown_minutes: 15
+
+  - name: vacuum_warning
+    pattern: '(vacuum|column pressure|gun pressure|buffer tank).*(warn|degraded|slow)'
+    severity: warning
+    cooldown_minutes: 30
+
+  - name: pump_fault
+    pattern: '(ion pump|turbo pump|backing pump|roughing pump).*(fault|fail|error|stopped|tripped)'
+    severity: critical
+    cooldown_minutes: 15
+
+  - name: ln2_fill_failed
+    pattern: '(ln2|liquid nitrogen|dewar|cold trap|autoloader).*(fail|error|abort|timeout|could not)'
+    severity: critical
+    cooldown_minutes: 30
+
+  - name: ln2_level_low
+    pattern: '(ln2|liquid nitrogen|dewar).*(low|empty|below|insufficient)'
+    severity: warning
+    cooldown_minutes: 30
+
+  - name: ln2_fill_overdue
+    pattern: '(refill|autofill|autoloader fill).*(overdue|missed|not completed)'
+    severity: warning
+    cooldown_minutes: 60
+
+  - name: general_error
+    pattern: '\b(error|exception|fault)\b'
+    severity: warning
+    cooldown_minutes: 20
+
+  - name: general_warning
+    pattern: '\bwarn(ing)?\b'
+    severity: info
+    cooldown_minutes: 30

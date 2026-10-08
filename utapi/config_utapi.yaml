@@ -1,0 +1,65 @@
+# Glacios 2 -> Slack monitor (UTAPI gRPC version) configuration
+#
+# Copy to config_utapi.yaml and edit.
+
+# --- Connection ------------------------------------------------------------
+# host: the Glacios 2 instrument control PC's IP/hostname, where
+# utapi_server.exe (the "UtapiServer" Windows service) is running.
+# Env var override: UTAPI_HOST
+host: "localhost"
+# port: confirmed as 46699 from Thermo's own example scripts
+# (config/addresses.py: UTAPI_SERVER_PORT = '46699'). Don't change this
+# unless Thermo support tells you otherwise.
+# Env var override: UTAPI_PORT
+port: 46699
+
+# --- Thresholds --------------------------------------------------------
+# How often to poll LN2/dewar status (there's no streaming "watch" RPC
+# for TemperatureService, so this is a plain poll loop). Vacuum state
+# and chamber pressure use UTAPI's streaming RPCs instead and update
+# as soon as the server pushes a change -- no polling interval needed
+# for those.
+poll_interval_seconds: 30
+
+# Alert if any vacuum chamber's pressure exceeds this (Pa). Tune to
+# your instrument's normal operating pressure -- 2e-7 Pa is a typical
+# healthy column pressure based on common cryo-TEM operating ranges,
+# so 1e-4 Pa as a fault threshold is a wide margin, not a tight one.
+# Watch the logs during normal operation for a few days and tighten
+# this once you know your instrument's real baseline.
+max_chamber_pressure_pa: 1.0e-4
+
+# Alert if LN2 dewar level drops below this percentage.
+dewar_min_percent: 20
+
+# Alert (info-level) if time until the next required LN2 refill drops
+# below this many minutes.
+dewar_refill_warn_minutes: 60
+
+# Alert (critical) if the dewar has been reported as "filling"
+# continuously for longer than this -- usually means a stuck/failed
+# autofill.
+dewar_filling_stuck_max_minutes: 20
+
+# Per-alert-type cooldowns (minutes) so a flapping condition doesn't
+# flood Slack. Keys match the internal alert names; you generally
+# won't need to touch these.
+cooldown_minutes:
+  vacuum_state: 15
+  chamber_pressure: 15
+  dewar_level: 30
+  dewar_refill_due: 60
+  dewar_filling_stuck: 30
+
+# --- State -----------------------------------------------------------------
+state_file: "./state/tem_utapi_monitor_state.json"
+
+# --- Slack ---------------------------------------------------------------
+# Env var overrides: REPLACE_ME, or SLACK_BOT_TOKEN + SLACK_CHANNEL
+slack_webhook_url: REPLACE_ME
+slack_bot_token: ""
+slack_channel: ""
+
+# true (default): log alerts instead of posting to Slack. Use this
+# while testing against the real instrument, before a channel exists.
+dry_run: false

@@ -1,0 +1,18 @@
+[Unit]
+Description=Glacios 2 TEM interface log -> Slack monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Adjust the user, working directory, and paths below for your install.
+User=temmonitor
+WorkingDirectory=/opt/glacios2-slack-monitor
+ExecStart=/opt/glacios2-slack-monitor/venv/bin/python /opt/glacios2-slack-monitor/tem_monitor.py --config /opt/glacios2-slack-monitor/config.yaml
+Restart=on-failure
+RestartSec=10
+# Optional: keep the Slack secret out of config.yaml entirely.
+# Environment=REPLACE_ME
+
+[Install]
+WantedBy=multi-user.target

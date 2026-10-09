@@ -56,7 +56,7 @@ state_file: "./state/tem_utapi_monitor_state.json"
 
 # --- Slack ---------------------------------------------------------------
 # Env var overrides: REPLACE_ME, or SLACK_BOT_TOKEN + SLACK_CHANNEL
-slack_webhook_url: 'https://hooks.slack.com/services/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' 
+slack_webhook_url: SLACK_WEBHOOK_URL 
 slack_bot_token: ""
 slack_channel: ""
 

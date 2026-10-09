@@ -1,51 +1,41 @@
 #!/usr/bin/env python3
-"""
-Glacios 2 -> Slack monitor (TEM Scripting API version)
-=========================================================
 
-Polls the microscope's live status via the TEM Scripting interface
-(Standard/Advanced Scripting, or UTAPI) using the `pytemscript` client,
-instead of parsing log files. This is the approach the cryo-EM
-community actually uses for automation (same interface EPU, Leginon,
-and SerialEM build on) -- it gives structured values like vacuum
-status and dewar level directly, rather than regex-matching log text.
-
-Architecture
-------------
-    [Instrument PC]                    [Monitoring machine -- can be
-      TEM Server (COM)                  the same PC, or anywhere on
-            |                           your network]
-      pytemscript-server   <--socket-->   this script (tem_api_monitor.py)
-      (bundled with pytemscript)                 |
-                                            Slack webhook / bot token
-
-`pytemscript-server` MUST run on the instrument control PC (the COM
-interface is local-only). This script is the *client* -- it can run
-on that same PC, or on another machine that can reach it over the
-network, by polling the socket server pytemscript-server exposes.
-
-REQUIRES: the TEM Scripting interface (Standard/Advanced Scripting or
-UTAPI) to be licensed and enabled on your instrument. Confirm this
-with your Thermo Fisher Field Service Engineer before relying on this
--- there's no way to check this remotely/in software ahead of time.
-
-IMPORTANT -- attribute names are not yet verified against a real
-Glacios 2: pytemscript's exact property/method names and return types
-can vary by TEM server version and by which scripting interface
-(Standard/Advanced/UTAPI) is active. The CHECKS below are written
-defensively (try/except per check, clearly logged) so a wrong
-attribute name degrades to a logged warning instead of a crash -- but
-you WILL want to verify the real attribute names against the
-pytemscript docs for your installed version, or by running
-`python -c "from pytemscript.microscope import Microscope; ..."`
-interactively against your real instrument, and adjust CHECKS
-accordingly. See README.md "Verifying the API checks".
-
-Usage:
-    python tem_api_monitor.py --config config_api.yaml
-    python tem_api_monitor.py --config config_api.yaml --once
-    python tem_api_monitor.py --config config_api.yaml --dry-run
-"""
+# Glacios 2 Slack monitor (TEM Scripting API version)
+# =========================================================
+#
+# Polls the microscope's live status via the TEM Scripting interface
+# (Standard/Advanced Scripting, or UTAPI) using the `pytemscript` client,
+# instead of parsing log files. This is the approach the cryo-EM
+# community actually uses for automation (same interface EPU, Leginon,
+# and SerialEM build on) It gives structured values like vacuum
+# status and dewar level directly, rather than regex-matching log text.
+#
+# `pytemscript-server` MUST run on the instrument control PC (the COM
+# interface is local-only). This script is the *client* -- it can run
+# on that same PC, or on another machine that can reach it over the
+# network, by polling the socket server pytemscript-server exposes.
+#
+# REQUIRES: the TEM Scripting interface (Standard/Advanced Scripting or
+# UTAPI) to be licensed and enabled on your instrument. Confirm this
+# with your Thermo Fisher Field Service Engineer before relying on this
+# -- there's no way to check this remotely/in software ahead of time.
+#
+# IMPORTANT: attribute names have not yet been verified against the
+# Glacios 2: pytemscript's exact property/method names and return types
+# can vary by TEM server version and by which scripting interface
+# (Standard/Advanced/UTAPI) is active. The CHECKS below are written
+# defensively (try/except per check, clearly logged) so a wrong
+# attribute name degrades to a logged warning instead of a crash.
+# Should verify the real attribute names against the
+# pytemscript docs for your installed version, or by running
+# `python -c "from pytemscript.microscope import Microscope; ..."`
+# interactively against your real instrument, and adjust CHECKS
+# accordingly. See README.md "Verifying the API checks".
+#
+# Usage:
+#     python tem_api_monitor.py --config config_api.yaml
+#     python tem_api_monitor.py --config config_api.yaml --once
+#     python tem_api_monitor.py --config config_api.yaml --dry-run
 
 from __future__ import annotations
 

@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
-"""
-Glacios 2 -> Slack monitor
-===========================
 
-Tails a TEM interface log file and posts Slack alerts when lines match
-configured rules (vacuum system faults, LN2/autoloader fill issues,
-general errors/warnings, etc.)
-
-Designed to run as a long-lived process (systemd service on Linux,
-or a scheduled/background task on Windows) on a machine that has
-access to the log file -- see README.md for deployment options.
-
-Usage:
-    python tem_monitor.py --config config.yaml
-    python tem_monitor.py --config config.yaml --dry-run   # force dry-run
-    python tem_monitor.py --config config.yaml --once      # process once and exit (for testing)
-
-State (file read offset + recent alert timestamps) is persisted to
-`state_file` so the monitor can be restarted without either replaying
-the entire log or losing rule cooldowns.
-"""
+# Glacios 2 Slack monitor
+# ===========================
+#
+# Tails a TEM interface log file and posts Slack alerts when lines match
+# configured rules (vacuum system faults, LN2/autoloader fill issues,
+# general errors/warnings, etc.)
+#
+# Designed to run as a long-lived process (systemd service on Linux,
+# or a scheduled/background task on Windows) on a machine that has
+# access to the log file -- see README.md for deployment options.
+#
+# Usage:
+#     python tem_monitor.py --config config.yaml
+#     python tem_monitor.py --config config.yaml --dry-run   # force dry-run
+#     python tem_monitor.py --config config.yaml --once      # process once and exit (for testing)
+#
+# State (file read offset + recent alert timestamps) is persisted to
+# `state_file` so the monitor can be restarted without either replaying
+# the entire log or losing rule cooldowns.
 
 from __future__ import annotations
 
@@ -59,7 +58,6 @@ SEVERITY_EMOJI = {
     "info": ":large_blue_circle:",
 }
 
-
 @dataclass
 class Rule:
     name: str
@@ -70,7 +68,6 @@ class Rule:
 
     def __post_init__(self):
         self.compiled = re.compile(self.pattern, re.IGNORECASE)
-
 
 @dataclass
 class Config:

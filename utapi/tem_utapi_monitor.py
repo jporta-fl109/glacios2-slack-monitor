@@ -1,34 +1,32 @@
 #!/usr/bin/env python3
 
-"""
-Glacios 2 -> Slack monitor (UTAPI gRPC version)
-==================================================
-
-Connects directly to Thermo's UTAPI server (utapi_server.exe, running
-on the instrument control PC, port 46699) over gRPC and watches:
-
-  - vacuum system state (VacuumService.WatchVacuumState -- streaming)
-  - per-chamber vacuum pressure (VacuumChambersService.WatchVacuumChambersPressure
-    -- streaming)
-  - LN2 dewar level, estimated time until refill, and whether it's
-    currently filling (TemperatureService -- polled; UTAPI has no
-    streaming "watch" RPC for these)
-
-This was built and tested against the real .proto files from the
-Glacios 2's UTAPI API folder (compiled with compile_protos.py) and
-verified end-to-end against a local fake UTAPI server standing in for
-the real instrument -- see PROJECT README "UTAPI version" for what was
-and wasn't verified against your actual hardware.
-
-Setup:
-    pip install -r requirements_utapi.txt
-    python compile_protos.py --api-dir "/path/to/Thermo UTAPI/API"
-    cp config_utapi.example.yaml config_utapi.yaml   # edit host/thresholds
-    python tem_utapi_monitor.py --config config_utapi.yaml --dry-run
-
-Then point it at the real UTAPI server (host = instrument PC's IP,
-port 46699) and flip dry_run off once you have a Slack destination.
-"""
+# Glacios 2 -> Slack monitor (UTAPI gRPC version)
+# ==================================================
+#
+# Connects directly to Thermo's UTAPI server (utapi_server.exe, running
+# on the instrument control PC, port 46699) over gRPC and watches:
+#
+#   - vacuum system state (VacuumService.WatchVacuumState streaming)
+#   - per-chamber vacuum pressure (VacuumChambersService.WatchVacuumChambersPressure
+#     -- streaming)
+#   - LN2 dewar level, estimated time until refill, and whether it's
+#     currently filling (TemperatureService; UTAPI has no
+#     streaming "watch" RPC for these)
+#
+# This was built and tested against the real .proto files from the
+# Glacios 2's UTAPI API folder (compiled with compile_protos.py) and
+# verified end-to-end against a local fake UTAPI server standing in for
+# the real instrument -- see PROJECT README "UTAPI version" for what was
+# and wasn't verified against your actual hardware.
+#
+# Setup:
+#     pip install -r requirements_utapi.txt
+#     python compile_protos.py --api-dir "/path/to/Thermo UTAPI/API"
+#     cp config_utapi.example.yaml config_utapi.yaml   # edit host/thresholds
+#     python tem_utapi_monitor.py --config config_utapi.yaml --dry-run
+#
+# Then point it at the real UTAPI server (host = instrument PC's IP,
+# port 46699) and flip dry_run off once you have a Slack destination.
 
 from __future__ import annotations
 

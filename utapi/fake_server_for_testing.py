@@ -1,6 +1,7 @@
-# Stand-in UTAPI server for local testing only -- NOT part of the real deployment.
+# Stand-in UTAPI server for local testing only. This is for testing only.
 # Simulates vacuum faults, a chamber pressure spike, and a low/filling LN2 dewar
 # so you can see tem_utapi_monitor.py react without touching the real instrument.
+
 import os
 import sys
 

@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
-"""
-Compiles the UTAPI .proto files this monitor needs into Python gRPC
-stubs. Run this once (and again if Thermo updates the API folder).
 
-Usage:
-    python compile_protos.py --api-dir "/path/to/Thermo UTAPI/API"
+# Compiles the UTAPI .proto files this monitor needs into Python gRPC
+# stubs. Run this once (and again if Thermo updates the API folder).
+#
+# Usage:
+#     python compile_protos.py --api-dir "/path/to/Thermo UTAPI/API"
+#
+# --api-dir should point at the "API" folder Thermo ships alongside
+# utapi_server.exe on the instrument control PC (the one with
+# vacuum/, sample/, utapi_types/, etc. subfolders) NOT a copy bundled
+# into this project, since it's Thermo's confidential/proprietary
+# material and shouldn't be duplicated into version control.
+#
+# Only the files this monitor actually uses are compiled:
+#     vacuum/vacuum.proto
+#     vacuum/vacuum_chambers.proto
+#     vacuum/column_valves.proto
+#     sample/v1/temperature.proto
+#     utapi_types/v1/utapi_response.proto
+#     utapi_types/v1/version_extensions.proto
+#     utapi_types/v1/device_id.proto
+#     utapi_types/v1/vector.proto
+#
+# Output goes to ./generated (gitignored) with the same package layout
+# Thermo's own example scripts use, e.g. `from vacuum import vacuum_pb2`.
 
---api-dir should point at the "API" folder Thermo ships alongside
-utapi_server.exe on the instrument control PC (the one with
-vacuum/, sample/, utapi_types/, etc. subfolders) -- NOT a copy bundled
-into this project, since it's Thermo's confidential/proprietary
-material and shouldn't be duplicated into version control.
-
-Only the files this monitor actually uses are compiled:
-    vacuum/vacuum.proto
-    vacuum/vacuum_chambers.proto
-    vacuum/column_valves.proto
-    sample/v1/temperature.proto
-    utapi_types/v1/utapi_response.proto
-    utapi_types/v1/version_extensions.proto
-    utapi_types/v1/device_id.proto
-    utapi_types/v1/vector.proto
-
-Output goes to ./generated (gitignored) with the same package layout
-Thermo's own example scripts use, e.g. `from vacuum import vacuum_pb2`.
-"""
 import argparse
 import os
 import shutil
